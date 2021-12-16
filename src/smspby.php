@@ -13,6 +13,7 @@ class smspby
     private $apikey;
     private $sender;
     public $service = 'https://cabinet.smsp.by/api/';
+    public $debug   = false;
     private $last_global_error_number;
 
     const IS_URGENT = 1;
@@ -252,7 +253,12 @@ class smspby
      */
     private function getRequest($cmd, $params = [])
     {
-        $client = new Client(['base_uri' => $this->service]);
+        if ($this->debug and (is_bool($this->debug) or is_resource($this->debug))) {
+            $client = new Client(['base_uri' => $this->service, 'debug' => $this->debug]);
+        } else {
+            $client = new Client(['base_uri' => $this->service]);
+        }
+
         $params['r'] = 'api/' . $cmd;
         $params['user'] = $this->user;
         $params['apikey'] = $this->apikey;
