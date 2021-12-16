@@ -14,7 +14,7 @@ class smspby
     private $sender;
     public $service = 'https://cabinet.smsp.by/api/';
     public $debug   = false;
-    private $last_global_error_number;
+    private $last_global_error_message;
 
     const IS_URGENT = 1;
 
@@ -42,7 +42,7 @@ class smspby
         $res = $this->getRequest('user_balance');
         if ($res) {
             if ($res->status == 'error') {
-                $this->last_global_error_number = $res->error;
+                $this->last_global_error_message = $res->error->description;
 
                 return false;
             } else {
@@ -84,7 +84,7 @@ class smspby
         $res = $this->getRequest('msg_send', $params);
         if ($res) {
             if ($res->status == 'error') {
-                $this->last_global_error_number = $res->error;
+                $this->last_global_error_message = $res->error->description;
 
                 return false;
             } else {
@@ -105,7 +105,7 @@ class smspby
         $res = $this->getRequest('msg_send_bulk', ['messages' => json_encode($messages)]);
         if ($res) {
             if ($res->status == 'error') {
-                $this->last_global_error_number = $res->error;
+                $this->last_global_error_message = $res->error->description;
 
                 return false;
             } else {
@@ -128,7 +128,7 @@ class smspby
         $res = $this->getRequest('msg_status', ['messages_id' => $sms_id]);
         if ($res) {
             if ($res->status == 'error') {
-                $this->last_global_error_number = $res->error;
+                $this->last_global_error_message = $res->error->description;
 
                 return false;
             } else {
@@ -175,7 +175,7 @@ class smspby
         $param2 = ''
     ) {
         if (!in_array($gender, ['N', 'M', 'F'])) {
-            $this->last_global_error_number = 'Введен не корректный gender. Должен быть N(null), M(мужской), F(жеский)';
+            $this->last_global_error_message = 'Введен не корректный gender. Должен быть N(null), M(мужской), F(женский)';
 
             return false;
         }
@@ -202,7 +202,7 @@ class smspby
         );
         if ($res) {
             if ($res->status == 'error') {
-                $this->last_global_error_number = $res->error;
+                $this->last_global_error_message = $res->error->description;
 
                 return false;
             } else {
@@ -226,7 +226,7 @@ class smspby
         $res = $this->getRequest('contact_delete', ['id' => $contact_id]);
         if ($res) {
             if ($res->status == 'error') {
-                $this->last_global_error_number = $res->error;
+                $this->last_global_error_message = $res->error->description;
 
                 return false;
             } else {
@@ -282,7 +282,15 @@ class smspby
      */
     public function getLastError()
     {
-        switch ($this->last_global_error_number) {
+        return $this->last_global_error_message;
+
+        // deprecated?
+        // example site response
+        // {
+        // +"code": 7
+        // +"description": "API call`s rate too high"
+        // }
+        switch ($this->last_global_error_message) {
             case 1:
                 return 'Логин не существует или указан не верно';
             case 2:
